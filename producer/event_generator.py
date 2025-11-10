@@ -30,7 +30,7 @@ REGION_WEIGHTS = [30, 25, 15, 10, 5, 5, 4, 3, 2, 1]
 EVENT_TYPES = ["call", "sms", "data_session", "balance_recharge", "service_activation"]
 EVENT_WEIGHTS = [20, 15, 50, 10, 5]  # data_session - 50%
 
-# ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
+# functions 
 
 def generate_masked_msisdn():
     """Генерирует маскированный номер: 7701234****"""

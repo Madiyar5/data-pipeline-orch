@@ -69,7 +69,7 @@ events_df = kafka_df \
 
 print("✅ Парсинг JSON событий настроен")
 
-# ==================== АГРЕГАЦИЯ ПО ОКНАМ ====================
+#aggregesion by windows
 
 print("📊 Настраиваем агрегацию по 1-минутным окнам...")
 
@@ -111,14 +111,14 @@ db_properties = {
 
 def write_to_postgres(batch_df, batch_id):
     """
-    Записывает каждый batch в PostgreSQL
+    batch в PostgreSQL
     """
     if batch_df.count() == 0:
         print(f"⚠️  Batch {batch_id}: нет данных для записи")
         return
     
     try:
-        # Показываем что записываем (первые 5 строк)
+        # Показываем что записываем 
         print(f"\n📝 Batch {batch_id}: записываем {batch_df.count()} строк")
         batch_df.show(5, truncate=False)
         
@@ -138,7 +138,7 @@ def write_to_postgres(batch_df, batch_id):
 
 print("🔌 Подключение к PostgreSQL настроено")
 
-# ==================== ЗАПУСК STREAMING QUERY ====================
+#streaming query
 
 print("=" * 60)
 print("🚀 STREAMING QUERY ЗАПУЩЕН!")
@@ -158,7 +158,7 @@ query = aggregated_df \
     .option("checkpointLocation", "/tmp/checkpoint") \
     .start()
 
-# Ждем завершения (или Ctrl+C)
+# Ждем завершения
 try:
     query.awaitTermination()
 except KeyboardInterrupt:

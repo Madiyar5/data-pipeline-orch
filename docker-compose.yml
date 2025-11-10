@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
 
-  # Zookeeper - нужен для Kafka
+  # Zookeeper
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     hostname: zookeeper
@@ -18,7 +18,7 @@ services:
     networks:
       - telecom-network
 
-  # Kafka - event streaming платформа
+  # Kafka 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     hostname: kafka
@@ -65,6 +65,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST_AUTH_METHOD: md5 
+      PGOPTIONS: "-c password_encryption=md5" # md5 sha256 spark иногда не подключается тоже вопрос??
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
@@ -94,9 +96,10 @@ services:
       _AIRFLOW_WWW_USER_PASSWORD: admin
     user: "${AIRFLOW_UID}:0"
     volumes:
-      - ./airflow/dags:/opt/airflow/dags
+      - ./dags:/opt/airflow/dags 
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/plugins:/opt/airflow/plugins
+      - ./spark:/app          
     networks:
       - telecom-network
     command: version
@@ -116,9 +119,10 @@ services:
       AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
     user: "${AIRFLOW_UID}:0"
     volumes:
-      - ./airflow/dags:/opt/airflow/dags
+      - ./dags:/opt/airflow/dags          
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/plugins:/opt/airflow/plugins
+      - ./spark:/app                      
     ports:
       - "8080:8080"
     networks:
@@ -144,9 +148,13 @@ services:
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
     user: "${AIRFLOW_UID}:0"
     volumes:
-      - ./airflow/dags:/opt/airflow/dags
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./dags:/opt/airflow/dags         
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/plugins:/opt/airflow/plugins
+      - ./spark:/app                        
+
+
     networks:
       - telecom-network
     command: scheduler
@@ -156,7 +164,6 @@ services:
     container_name: spark-streaming
     hostname: spark-streaming
     depends_on:
-      - kafka
       - postgres
     networks:
       - telecom-network
